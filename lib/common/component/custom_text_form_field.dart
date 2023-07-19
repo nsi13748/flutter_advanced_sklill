@@ -30,8 +30,10 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       // 비밀번호 입력할때 사용
       obscureText: obscureText,
+
       // 이 화면에 올때 자동으로 포커싱
       autofocus: autofocus,
+
       // 값이 바뀔때마다 실행되는 콜백
       onChanged: onChanged,
       cursorColor: PRIMARY_COLOR,
