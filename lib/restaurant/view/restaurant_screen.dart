@@ -1,5 +1,6 @@
 import 'package:ch1_basic_ui/restaurant/component/restaurant_card.dart';
 import 'package:ch1_basic_ui/restaurant/model/restaurant_model.dart';
+import 'package:ch1_basic_ui/restaurant/view/restaurant_detail_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +28,7 @@ class RestaurantScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: FutureBuilder<List>(
           future: pagenateRestaurant(),
+          // => Api 요청을 해서 resp.data['data'] 를 반환하는 함수
           builder: (context, AsyncSnapshot<List> snapshot) {
             // print(snapshot.data);
             if (!snapshot.hasData) {
@@ -36,30 +38,17 @@ class RestaurantScreen extends StatelessWidget {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (_, index) {
                   final item = snapshot.data![index];
-                  final pItem = RestaurantModel(
-                      id: item['id'],
-                      name: item['name'],
-                      thumbUrl: 'http://$ip${item['thumbUrl']}',
-                      tags: List<String>.from(item['tags']),
-                      priceRange: RestaurantPriceRange.values.firstWhere((e) => e.name == item['priceRange']),  /// enum의 값을 리스트로
-                      ratings: item['ratings'],
-                      ratingsCount: item['ratingsCount'],
-                      deliveryTime: item['deliveryTime'],
-                      deliveryFee: item['deliveryFee']);
+                  final pItem = RestaurantModel.fromJson(json: item);
 
-                  return RestaurantCard(
-                      image: Image.network(
-                        pItem.thumbUrl,
-                        fit: BoxFit
-                            .cover, // Image.asset()의 fit: -> BoxFit.cover를 해야 이미지가 꽉찬다.
-                      ),
-                      name: pItem.name,
-                      tags: pItem.tags,
-                      ///  리스트로 받아왔지만, 기본값으로 List<dynamic> 타입으로 들어오게 된다.
-                      ratingsCount: pItem.ratingsCount,
-                      deliveryTime: pItem.deliveryTime,
-                      deliveryFee: pItem.deliveryFee,
-                      ratings: pItem.ratings);
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => RestaurantDetailScreen(),
+                          ),
+                        );
+                      },
+                      child: RestaurantCard.fromModel(model: pItem));
                 },
                 separatorBuilder: (_, index) {
                   return SizedBox(

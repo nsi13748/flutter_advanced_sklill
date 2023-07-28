@@ -1,5 +1,9 @@
+import '../../common/const/data.dart';
+
 enum RestaurantPriceRange {
-  expensive, medium, cheap
+  expensive,
+  medium,
+  cheap
 }
 
 class RestaurantModel {
@@ -24,4 +28,21 @@ class RestaurantModel {
     required this.deliveryTime,
     required this.deliveryFee,
   });
+
+
+  // factory 생성자이고,  RestaurantModel.fromJson() 이거 자체가 named 생성자이다.
+  factory RestaurantModel.fromJson({
+    required Map<String, dynamic> json
+  }) {
+    return RestaurantModel(
+        id: json['id'],
+        name: json['name'],
+        thumbUrl: 'http://$ip${json['thumbUrl']}',
+        tags: List<String>.from(json['tags']),
+        priceRange: RestaurantPriceRange.values.firstWhere((e) => e.name == json['priceRange']),  /// enum의 값을 리스트로
+        ratings: json['ratings'],
+        ratingsCount: json['ratingsCount'],
+        deliveryTime: json['deliveryTime'],
+        deliveryFee: json['deliveryFee']);
+  }
 }
