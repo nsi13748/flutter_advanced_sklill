@@ -3,6 +3,7 @@ import 'package:ch1_basic_ui/common/const/data.dart';
 import 'package:ch1_basic_ui/common/layout/default_layout.dart';
 import 'package:ch1_basic_ui/common/view/root_tab.dart';
 import 'package:ch1_basic_ui/user/view/login_screen.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,7 +14,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -26,19 +26,34 @@ class _SplashScreenState extends State<SplashScreen> {
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
     final accessToken = await storage.read(key: ACCESS_TOKEN_KEY);
 
-    if(refreshToken == null || accessToken == null) {
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => LoginScreen()), (route) => false);
+    if (refreshToken == null) {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => LoginScreen()), (route) => false);
+      return ; // 이렇게 하면 이 코드가 실행될 떄 아후의 코드 실행 X
+    }
 
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => RootTab()), (route) => false);
+    final Dio dio = Dio();
+
+    try {
+      // refreshToken이 만료가 안된경우 -> statusCode 가 정상일 경우
+      final resp = await dio.post(
+        'http://$ip/auth/token',
+        options: Options(headers: {'authorization': 'Bearer $refreshToken'}),
+      );
+      storage.write(key: ACCESS_TOKEN_KEY, value: resp.data['accessToken']);
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => RootTab()), (route) => false);
+    } catch (e) {
+      // refreshToken 이 만료 -> statusCode가 비정상일 경우 -> 로그인 화면
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => LoginScreen()), (route) => false);
     }
   }
-
 
   void deleteToken() async {
     await storage.deleteAll();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +64,16 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('asset/img/logo/logo.png',
-            width: MediaQuery.of(context).size.width/2,
+            Image.asset(
+              'asset/img/logo/logo.png',
+              width: MediaQuery.of(context).size.width / 2,
             ),
-            const SizedBox(height: 16,),
+            const SizedBox(
+              height: 16,
+            ),
             CircularProgressIndicator(
               color: Colors.white,
             )
-
           ],
         ),
       ),

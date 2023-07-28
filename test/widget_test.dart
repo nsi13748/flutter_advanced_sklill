@@ -28,3 +28,15 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 }
+
+
+class MyApp() extends StatelessWidget {
+  const MyApp()({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+    body: Center(),
+    );
+  }
+}

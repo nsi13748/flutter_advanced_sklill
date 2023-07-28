@@ -10,6 +10,11 @@ import 'package:flutter/material.dart';
 import '../../common/component/custom_text_form_field.dart';
 import '../../common/view/root_tab.dart';
 
+
+
+/// 로그인 로직도 여기에 구현되어있음.
+///
+
 class LoginScreen extends StatefulWidget {
 
   const LoginScreen({super.key});
@@ -26,16 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final dio = Dio(); // API 통신을 위한 Dio 선언
-    // Create storage
 
-    // 에뮬레이터 기준 10.0.2.2:3000 가 기본 local host
-    final emulatorIp = '192.168.0.36:3000';
-    // 시뮬레이터 기준 127.0.0.1:3000 가 기본 local host
-    final simulatorIp = '127.0.0.1:3000';
 
-    final ip = Platform.isIOS   // io패키지의 Platfrom 클래스를 인스턴스화 하지않고 스태틱 메서드만 사용.
-        ? simulatorIp // ios 는 시뮬레이터
-        : emulatorIp; // and는 애뮬레이터
 
     return DefaultLayout(
       child: SingleChildScrollView( // 키보드가 올라왔을때 오류나는걸 막아주는 방법
@@ -75,13 +72,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                 ),
                 const SizedBox(height: 16,),
+
+                /// 로그인 버튼
                 ElevatedButton(
                   onPressed: () async {
                     final rawString = '$username:$password';    // 아이디와 비밀번호. -> base64로 인코딩하는법
 
-
                     Codec<String, String> stringToBase64 = utf8.fuse(base64); // 이거는 외워야함. 일반 String -> base64로 변경
                     String token = stringToBase64.encode(rawString);
+                    print(ip);
 
                     final response = await dio.post('http://$ip/auth/login',
                       options: Options(
@@ -90,7 +89,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                       ),
                     );
+
                     print(response.data); // response.data = HTTP 의 body 부분을 Json형태로 응답
+
                     final refreshToken = response.data['refreshToken'];
                     final accessToke = response.data['accessToken'];
 
@@ -107,17 +108,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text('로그인'),
                 ),
+
+
+                /// 회원가입 버튼
                 TextButton(
                   onPressed: () async {
-                    final refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RAY29kZWZhY3RvcnkuYWkiLCJzdWIiOiJmNTViMzJkMi00ZDY4LTRjMWUtYTNjYS1kYTlkN2QwZDkyZTUiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTY4OTY2NTM2NSwiZXhwIjoxNjg5NzUxNzY1fQ.g4YuCr2dsEpQCP7HPsDYpyaI3dBMuPqTdUcILP1enyw";
 
-                    final response = await dio.post('http://$ip/auth/token',
-                      options: Options(
-                          headers: {
-                            'authorization' : 'Bearer $refreshToken'
-                          }
-                      ),
-                    );
                   },
                   style: TextButton.styleFrom(
                     primary: Colors.black,
